@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fix the Words</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Layout: one big centred play card; picture on top, the word to fix in the middle, the 3 keys underneath. */
+  --bg: #fff3cf;
+  --ink: #1d2b53;
+  --card: #ffffff;
+  --accent: #ff5a5f;
+  --good: #22a565;
+  --key: #e7edfb;
+  --soft: #6b7699;
+  --display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Andika", "Comic Sans MS", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  gap: 14px;
+}
+h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
+
+.top {
+  width: 100%; max-width: 760px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.top h1 { font-size: 30px; }
+.stars { display: flex; gap: 4px; flex-wrap: wrap; font-size: 24px; }
+.stars span { filter: grayscale(1); opacity: .3; transition: transform .3s; }
+.stars span.on { filter: none; opacity: 1; transform: scale(1.15); }
+
+.card {
+  width: 100%; max-width: 760px;
+  background: var(--card);
+  border-radius: 28px;
+  box-shadow: 0 8px 0 rgba(29,43,83,.12);
+  padding: 22px 20px 26px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  text-align: center;
+}
+.round {
+  font-family: var(--display); font-weight: 700; font-size: 18px;
+  background: var(--ink); color: #fff; padding: 6px 16px; border-radius: 999px;
+}
+.task { font-size: 24px; font-weight: 700; margin: 0; }
+.task .tip { display: block; font-weight: 400; font-size: 18px; color: var(--soft); margin-top: 4px; }
+.pic { font-size: 110px; line-height: 1; }
+
+#word {
+  width: 100%; max-width: 620px;
+  font-family: var(--body); font-weight: 700;
+  font-size: clamp(40px, 9vw, 72px);
+  letter-spacing: .12em;
+  text-align: center;
+  color: var(--ink);
+  caret-color: var(--accent);
+  background: #f6f8ff;
+  border: 5px solid var(--key);
+  border-radius: 20px;
+  padding: 10px 14px;
+  outline: none;
+}
+#word:focus { border-color: var(--accent); }
+#word.done { border-color: var(--good); background: #e9f9f0; color: var(--good); }
+
+.answer { font-size: 22px; color: var(--soft); min-height: 30px; margin: 0; }
+.answer b { color: var(--ink); letter-spacing: .1em; }
+
+.keys { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.k {
+  min-width: 82px; padding: 10px 14px;
+  background: var(--key); border-radius: 14px;
+  box-shadow: 0 5px 0 #c5d0ee;
+  font-family: var(--display); font-size: 30px; font-weight: 700;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  transition: transform .08s, background .08s, box-shadow .08s;
+}
+.k small { font-family: var(--body); font-size: 14px; font-weight: 700; color: var(--soft); }
+.k.wide { min-width: 150px; }
+.k.press { transform: translateY(5px); box-shadow: 0 0 0 #c5d0ee; background: #ffd9da; }
+
+.btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+button {
+  font-family: var(--display); font-weight: 700; font-size: 22px;
+  border: 0; border-radius: 16px; padding: 12px 24px; cursor: pointer;
+  background: var(--key); color: var(--ink); box-shadow: 0 5px 0 #c5d0ee;
+}
+button:active { transform: translateY(4px); box-shadow: 0 1px 0 #c5d0ee; }
+button:focus-visible { outline: 4px solid var(--accent); outline-offset: 3px; }
+button.go { background: var(--accent); color: #fff; box-shadow: 0 5px 0 #c63c41; font-size: 28px; padding: 14px 34px; }
+button.next { background: var(--good); color: #fff; box-shadow: 0 5px 0 #17784a; }
+
+.yay { font-family: var(--display); font-size: 40px; font-weight: 700; color: var(--good); min-height: 50px; margin: 0; }
+.hidden { display: none !important; }
+
+.intro p { font-size: 22px; max-width: 30ch; margin: 0; }
+.intro .demo { font-size: 90px; }
+
+footer { font-size: 15px; color: var(--soft); text-align: center; max-width: 760px; }
+canvas#fx { position: fixed; inset: 0; pointer-events: none; width: 100%; height: 100%; }
+
+@media (max-width: 420px) {
+  .pic { font-size: 80px; }
+  .k { min-width: 64px; font-size: 24px; }
+  .k.wide { min-width: 110px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Fix the Words ✏️</h1>
+  <div class="stars" id="stars" aria-label="Stars"></div>
+</header>
+
+<!-- Start screen -->
+<main class="card intro" id="intro">
+  <div class="demo">🐱</div>
+  <h2 style="font-size:34px">Oh no! The words are broken!</h2>
+  <p>Move the cursor with the arrow keys. Delete or add letters to fix each word.</p>
+  <div class="keys" aria-hidden="true">
+    <div class="k">←<small>move</small></div>
+    <div class="k">→<small>move</small></div>
+    <div class="k wide">⌫<small>Backspace</small></div>
+  </div>
+  <button class="go" id="start">Start ▶</button>
+</main>
+
+<!-- Game screen -->
+<main class="card hidden" id="game">
+  <div class="round" id="round">Round 1</div>
+  <p class="task" id="task"></p>
+  <div class="pic" id="pic" aria-hidden="true"></div>
+  <label for="word" class="hidden">Word to fix</label>
+  <input id="word" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <p class="yay" id="yay"></p>
+  <p class="answer" id="answer"></p>
+  <div class="keys" aria-hidden="true">
+    <div class="k" id="kL">←<small>move</small></div>
+    <div class="k" id="kR">→<small>move</small></div>
+    <div class="k wide" id="kB">⌫<small>Backspace</small></div>
+    <div class="k" id="kA">abc<small>type</small></div>
+  </div>
+  <div class="btns">
+    <button id="help">👀 Help</button>
+    <button id="reset">↺ Try again</button>
+    <button class="next hidden" id="next">Next ▶</button>
+  </div>
+</main>
+
+<!-- End screen -->
+<main class="card hidden" id="end">
+  <div class="pic">🏆</div>
+  <h2 style="font-size:40px">Super star!</h2>
+  <p class="task">You fixed <span id="total">12</span> words!</p>
+  <button class="go" id="again">Play again ↺</button>
+</main>
+
+<footer>⌫ Backspace deletes the letter <b>before</b> the cursor. Use ← → to move the cursor.</footer>
+
+<canvas id="fx"></canvas>
+
+<script>
+const ROUNDS = [
+  { name: "Round 1", task: "Too many letters!", tip: "Move with → then press ⌫ Backspace",
+    items: [
+      { pic: "🐱", broken: "catt",  fix: "cat" },
+      { pic: "🐶", broken: "doog",  fix: "dog" },
+      { pic: "☀️", broken: "ssun",  fix: "sun" },
+      { pic: "🐟", broken: "fissh", fix: "fish" }
+    ] },
+  { name: "Round 2", task: "A letter is missing!", tip: "Move with → then type the letter",
+    items: [
+      { pic: "🚗", broken: "cr",   fix: "car" },
+      { pic: "🐸", broken: "frg",  fix: "frog" },
+      { pic: "🌳", broken: "tre",  fix: "tree" },
+      { pic: "🍎", broken: "aple", fix: "apple" }
+    ] },
+  { name: "Round 3", task: "Fix the sentence!", tip: "Find the mistake. Delete or add letters.",
+    items: [
+      { pic: "🐱", broken: "I see a catt", fix: "I see a cat" },
+      { pic: "☀️", broken: "the sn is hot", fix: "the sun is hot" },
+      { pic: "🐶", broken: "my dogg is big", fix: "my dog is big" },
+      { pic: "🐟", broken: "a red fsh", fix: "a red fish" }
+    ] }
+];
+const ALL = ROUNDS.flatMap((r, ri) => r.items.map(it => ({ ...it, ri })));
+
+const $ = id => document.getElementById(id);
+const word = $("word");
+let idx = 0, solved = false;
+
+// stars bar
+function drawStars() {
+  $("stars").innerHTML = ALL.map((_, i) => `<span class="${i < idx || (i === idx && solved) ? "on" : ""}">⭐</span>`).join("");
+}
+
+const norm = s => s.trim().replace(/\s+/g, " ").toLowerCase();
+
+function load() {
+  const it = ALL[idx], r = ROUNDS[it.ri];
+  solved = false;
+  $("round").textContent = r.name;
+  $("task").innerHTML = `${r.task}<span class="tip">${r.tip}</span>`;
+  $("pic").textContent = it.pic;
+  word.value = it.broken;
+  word.classList.remove("done");
+  word.readOnly = false;
+  $("yay").textContent = "";
+  $("answer").innerHTML = "";
+  $("next").classList.add("hidden");
+  drawStars();
+  word.focus();
+  word.setSelectionRange(0, 0); // cursor starts at the beginning
+}
+
+function check() {
+  if (solved) return;
+  if (norm(word.value) === norm(ALL[idx].fix)) {
+    solved = true;
+    word.classList.add("done");
+    word.readOnly = true;
+    const cheers = ["Well done! 🎉", "Great job! 🌟", "Brilliant! 🎉", "You did it! 🥳"];
+    $("yay").textContent = cheers[idx % cheers.length];
+    $("answer").innerHTML = "";
+    $("next").classList.remove("hidden");
+    $("next").focus();
+    drawStars();
+    confetti();
+  }
+}
+
+function next() {
+  idx++;
+  if (idx >= ALL.length) {
+    $("game").classList.add("hidden");
+    $("end").classList.remove("hidden");
+    $("total").textContent = ALL.length;
+    drawStars();
+    confetti(); confetti();
+  } else load();
+}
+
+// light up the on-screen keys
+function flash(id) {
+  const el = $(id); el.classList.add("press");
+  setTimeout(() => el.classList.remove("press"), 160);
+}
+word.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") flash("kL");
+  else if (e.key === "ArrowRight") flash("kR");
+  else if (e.key === "Backspace" || e.key === "Delete") flash("kB");
+  else if (e.key.length === 1) flash("kA");
+  if (e.key === "Enter" && solved) next();
+});
+word.addEventListener("input", check);
+
+$("start").onclick = () => { $("intro").classList.add("hidden"); $("game").classList.remove("hidden"); idx = 0; load(); };
+$("again").onclick = () => { $("end").classList.add("hidden"); $("game").classList.remove("hidden"); idx = 0; load(); };
+$("next").onclick = next;
+$("reset").onclick = () => { if (!solved) { word.value = ALL[idx].broken; word.focus(); word.setSelectionRange(0, 0); } };
+$("help").onclick = () => {
+  if (solved) return;
+  $("answer").innerHTML = `It should say: <b>${ALL[idx].fix}</b>`;
+  word.focus();
+};
+
+// confetti
+const cv = $("fx"), cx = cv.getContext("2d");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let bits = [], running = false;
+function confetti() {
+  if (reduce) return;
+  cv.width = innerWidth; cv.height = innerHeight;
+  const colors = ["#ff5a5f", "#22a565", "#ffb400", "#3d7bff", "#b14dff"];
+  for (let i = 0; i < 90; i++) bits.push({
+    x: innerWidth / 2, y: innerHeight / 2.4,
+    vx: (Math.random() - .5) * 14, vy: Math.random() * -14 - 3,
+    s: 6 + Math.random() * 8, c: colors[i % colors.length], r: Math.random() * 6, life: 90
+  });
+  if (!running) { running = true; requestAnimationFrame(tick); }
+}
+function tick() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  bits = bits.filter(b => b.life-- > 0);
+  for (const b of bits) {
+    b.vy += .45; b.x += b.vx; b.y += b.vy; b.r += .2;
+    cx.save(); cx.translate(b.x, b.y); cx.rotate(b.r);
+    cx.fillStyle = b.c; cx.fillRect(-b.s / 2, -b.s / 4, b.s, b.s / 2); cx.restore();
+  }
+  if (bits.length) requestAnimationFrame(tick); else { running = false; cx.clearRect(0, 0, cv.width, cv.height); }
+}
+
+drawStars();
+</script>
+</body>
+</html>
