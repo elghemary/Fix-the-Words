@@ -1,0 +1,444 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Wake Up, Computer!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;800&display=swap">
+<style>
+/* Layout: one stage; a big cartoon computer in the middle, its power button and keyboard below, big tap targets everywhere.
+   Single bright classroom look on purpose (same palette as the slides), so no dark variant. */
+:root {
+  color-scheme: light;
+  --bg: #eaf7e6;
+  --ink: #1b1b1b;
+  --paper: #ffffff;
+  --screen-off: #2b2b2b;
+  --purple: #7d5cd6;
+  --teal: #1b8a86;
+  --orange: #e0703a;
+  --green: #2f9e5b;
+  --red: #d63b3b;
+  --gold: #ffc83d;
+  --soft: #f4f1fd;
+  --font: "Lexend", "Trebuchet MS", Arial, sans-serif;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); padding-inline: 16px; padding-block: 12px; box-sizing: border-box; }
+* { box-sizing: border-box; }
+button { font-family: inherit; cursor: pointer; color: var(--ink); }
+button:focus-visible { outline: 4px solid var(--purple); outline-offset: 3px; }
+.app { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+
+.top { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.stars { display: flex; gap: 6px; }
+.stars svg { width: 44px; height: 44px; }
+.stars path { fill: var(--paper); stroke: var(--ink); stroke-width: 3; transition: fill .3s; }
+.stars .on path { fill: var(--gold); }
+.round-btn { width: 64px; height: 64px; border-radius: 50%; border: 4px solid var(--ink); background: var(--ink); display: grid; place-items: center; flex: none; }
+.round-btn svg { width: 34px; height: 34px; }
+
+.hint { min-height: 76px; display: flex; align-items: center; gap: 10px; background: var(--paper); border: 4px solid var(--ink); border-radius: 18px; padding: 8px 16px; }
+.hint[hidden] { display: none !important; }
+.hint .lock { width: 40px; height: 40px; }
+.hint .shape { width: 54px; height: 54px; }
+
+/* the computer */
+.pc { width: min(100%, 640px); display: flex; flex-direction: column; align-items: center; }
+.monitor { width: 100%; background: var(--paper); border: 6px solid var(--ink); border-radius: 26px; padding: 16px; position: relative; }
+.screen { position: relative; aspect-ratio: 16 / 10; max-width: 100%; border: 5px solid var(--ink); border-radius: 10px; background: var(--paper); overflow: hidden; display: grid; place-items: center; transition: background .4s; }
+.screen.off { background: var(--screen-off); }
+.screen.desk { background: linear-gradient(160deg, #cfe9ff, #f6e7ff); }
+.neck { width: 60px; height: 38px; border-left: 6px solid var(--ink); border-right: 6px solid var(--ink); }
+.foot { width: 220px; height: 8px; background: var(--ink); border-radius: 4px; }
+
+.plug { position: absolute; right: -54px; bottom: 40px; width: 52px; height: 64px; background: none; border: 0; padding: 0; }
+.plug svg { width: 100%; height: 100%; }
+
+.desk-row { width: 100%; display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 14px; flex-wrap: wrap; }
+.power { width: 104px; height: 104px; border-radius: 50%; border: 6px solid var(--ink); background: #e9f8e6; display: grid; place-items: center; }
+.power svg { width: 56px; height: 56px; }
+.keyboard { display: flex; gap: 8px; align-items: center; background: var(--paper); border: 5px solid var(--ink); border-radius: 16px; padding: 10px 12px; }
+.key { width: 46px; height: 46px; border: 4px solid var(--ink); border-radius: 8px; background: var(--paper); }
+.key.enter { width: 92px; display: grid; place-items: center; }
+.key.enter svg { width: 46px; height: 32px; }
+
+.pulse { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(47,158,91,.55); transform: scale(1); } 50% { box-shadow: 0 0 0 16px rgba(47,158,91,0); transform: scale(1.06); } }
+.shake { animation: shake .45s; }
+@keyframes shake { 20% { transform: translateX(-10px); } 40% { transform: translateX(10px); } 60% { transform: translateX(-7px); } 80% { transform: translateX(7px); } }
+
+/* things on the screen */
+.layer { position: absolute; inset: 0; display: grid; place-items: center; padding: 4%; }
+.spinner { width: 26%; aspect-ratio: 1; }
+.spinner circle { fill: var(--ink); }
+.spin { animation: spin 1s steps(8) infinite; transform-origin: 50% 50%; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.who { display: flex; gap: 6%; width: 100%; justify-content: center; }
+.tile { width: 26%; aspect-ratio: 1; border: 5px solid var(--ink); border-radius: 18px; background: var(--paper); display: grid; place-items: center; padding: 10%; }
+.tile svg { width: 100%; height: 100%; }
+.pw { display: flex; flex-direction: column; align-items: center; gap: 6%; width: 100%; }
+.dots { display: flex; gap: 14px; border: 5px solid var(--ink); border-radius: 12px; padding: 10px 18px; background: var(--paper); }
+.dot { width: 26px; height: 26px; border-radius: 50%; border: 4px solid var(--ink); background: var(--paper); }
+.dot.full { background: var(--ink); }
+.pads { display: flex; gap: 4%; width: 100%; justify-content: center; }
+.pad { width: 21%; aspect-ratio: 1; border: 5px solid var(--ink); border-radius: 16px; background: var(--paper); padding: 4%; display: grid; place-items: center; }
+.pad svg { width: 100%; height: 100%; }
+.yay { width: 34%; }
+.corner { position: absolute; width: 17%; aspect-ratio: 1; border: 5px solid var(--ink); border-radius: 14px; background: var(--paper); padding: 2.5%; display: grid; place-items: center; }
+.corner svg { width: 100%; height: 100%; }
+.corner.tl { left: 3%; top: 5%; } .corner.tr { right: 3%; top: 5%; } .corner.bl { left: 3%; bottom: 5%; } .corner.br { right: 3%; bottom: 5%; }
+.menu-pop { position: absolute; left: 22%; bottom: 5%; width: 46%; background: var(--paper); border: 5px solid var(--ink); border-radius: 14px; padding: 3%; display: flex; flex-direction: column; gap: 8px; }
+.opt { height: 48px; border: 4px solid var(--ink); border-radius: 10px; background: #f0f0f0; display: flex; align-items: center; gap: 10px; padding: 0 12px; font-weight: 800; font-size: clamp(14px, 2.6vw, 22px); }
+.opt .bar { height: 14px; width: 55%; border-radius: 7px; background: #bdbdbd; }
+.opt svg { width: 30px; height: 30px; flex: none; }
+.opt.sd { background: #ffe08a; }
+.zz { color: var(--paper); font-weight: 800; font-size: clamp(40px, 10vw, 96px); letter-spacing: .1em; }
+
+.caption { min-height: 2.6em; text-align: center; font-size: clamp(18px, 3.4vw, 26px); font-weight: 600; max-width: 34ch; text-wrap: balance; margin: 0; }
+
+/* start + end + order */
+.panel { width: min(100%, 640px); background: var(--paper); border: 6px solid var(--ink); border-radius: 26px; padding: 22px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.title { font-weight: 800; font-size: clamp(30px, 6vw, 52px); margin: 0; text-align: center; text-wrap: balance; }
+.steps4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 100%; }
+.card { aspect-ratio: 3 / 4; border: 5px solid var(--ink); border-radius: 16px; background: var(--paper); padding: 8%; display: grid; place-items: center; position: relative; }
+.card svg { width: 100%; height: 100%; }
+.card .n { position: absolute; top: -16px; left: -12px; width: 40px; height: 40px; border-radius: 50%; background: var(--orange); color: var(--paper); font-weight: 800; font-size: 22px; display: grid; place-items: center; }
+.card.done { border-color: var(--green); background: #e9f8e6; }
+.play { width: 120px; height: 120px; border-radius: 50%; border: 6px solid var(--ink); background: var(--green); display: grid; place-items: center; }
+.play svg { width: 60px; height: 60px; }
+.big-star { width: min(60vw, 240px); }
+.big-star path { fill: var(--gold); stroke: var(--ink); stroke-width: 3; }
+
+@media (max-width: 560px) {
+  .plug { right: -10px; bottom: -64px; width: 40px; height: 50px; }
+  .power { width: 84px; height: 84px; }
+  .key { width: 34px; height: 34px; }
+  .key.enter { width: 70px; }
+}
+@media (prefers-reduced-motion: reduce) { .pulse, .shake, .spin { animation: none; } }
+</style>
+
+<div class="app" id="app">
+  <div class="top">
+    <div class="stars" id="stars" aria-label="Stars"></div>
+    <button class="round-btn" id="listen" aria-label="Listen again">
+      <svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <!-- start -->
+  <section class="panel" id="start">
+    <h1 class="title">Wake Up, Computer!</h1>
+    <div class="steps4" id="startSteps"></div>
+    <button class="play" id="playBtn" aria-label="Start the game">
+      <svg viewBox="0 0 100 100"><path d="M32 18 L84 50 L32 82 Z" fill="#fff"/></svg>
+    </button>
+  </section>
+
+  <!-- game -->
+  <section id="game" hidden style="width:100%;display:flex;flex-direction:column;align-items:center;gap:14px">
+    <div class="hint" id="hint" hidden></div>
+    <div class="pc">
+      <div class="monitor" id="monitor">
+        <div class="screen off" id="screen"></div>
+        <button class="plug" id="plug" aria-label="The plug">
+          <svg viewBox="0 0 52 64"><path d="M26 64 V44" stroke="#1b1b1b" stroke-width="6" stroke-linecap="round"/><rect x="8" y="16" width="36" height="30" rx="7" fill="#fff" stroke="#1b1b1b" stroke-width="5"/><path d="M18 16 V3 M34 16 V3" stroke="#1b1b1b" stroke-width="6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="neck"></div>
+      <div class="foot"></div>
+      <div class="desk-row">
+        <button class="power" id="power" aria-label="Power button"><svg viewBox="0 0 60 60" id="powerIcon"></svg></button>
+        <div class="keyboard" aria-hidden="false">
+          <span class="key"></span><span class="key"></span><span class="key"></span>
+          <button class="key enter" id="enter" aria-label="Enter key"><svg viewBox="0 0 46 32"><path d="M38 4 V20 H10" fill="none" stroke="#1b1b1b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 13 L9 20 L16 27" fill="none" stroke="#1b1b1b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+      </div>
+    </div>
+    <p class="caption" id="caption" aria-live="polite"></p>
+  </section>
+
+  <!-- order bonus -->
+  <section class="panel" id="order" hidden>
+    <div class="steps4" id="orderCards"></div>
+    <p class="caption" id="orderCaption"></p>
+  </section>
+
+  <!-- end -->
+  <section class="panel" id="end" hidden>
+    <svg class="big-star" viewBox="0 0 100 100"><path d="M50 6 L62 37 L95 38 L69 58 L78 91 L50 72 L22 91 L31 58 L5 38 L38 37 Z"/></svg>
+    <h2 class="title">Computer Captain!</h2>
+    <button class="round-btn" id="again" aria-label="Play again" style="width:96px;height:96px">
+      <svg viewBox="0 0 24 24"><path d="M19 12a7 7 0 1 1-2.05-4.95" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><path d="M19 4v4h-4" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const INK = '#1b1b1b';
+
+  // ---------- pictures ----------
+  const powerSvg = (w = 6) => `<path d="M17 15 A17 17 0 1 0 43 15" fill="none" stroke="${INK}" stroke-width="${w}" stroke-linecap="round"/><path d="M30 6 V28" stroke="${INK}" stroke-width="${w}" stroke-linecap="round"/>`;
+  $('powerIcon').innerHTML = powerSvg(7);
+  const STAR = 'M50 6 L62 37 L95 38 L69 58 L78 91 L50 72 L22 91 L31 58 L5 38 L38 37 Z';
+  const SHAPES = {
+    'red circle':      `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#d63b3b" stroke="${INK}" stroke-width="6"/></svg>`,
+    'blue square':     `<svg viewBox="0 0 100 100"><rect x="12" y="12" width="76" height="76" rx="8" fill="#3d7be0" stroke="${INK}" stroke-width="6"/></svg>`,
+    'green triangle':  `<svg viewBox="0 0 100 100"><path d="M50 10 L92 88 H8 Z" fill="#2f9e5b" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/></svg>`,
+    'yellow star':     `<svg viewBox="0 0 100 100"><path d="${STAR}" fill="#ffc83d" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/></svg>`,
+  };
+  const AVATARS = {
+    'cat':  `<svg viewBox="0 0 100 100"><path d="M20 40 L22 10 L42 28 H58 L78 10 L80 40 Q84 82 50 86 Q16 82 20 40 Z" fill="#ffd9a8" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/><circle cx="38" cy="52" r="5" fill="${INK}"/><circle cx="62" cy="52" r="5" fill="${INK}"/><path d="M46 64 L50 68 L54 64" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><path d="M10 60 H32 M10 70 H32 M68 60 H90 M68 70 H90" stroke="${INK}" stroke-width="3" stroke-linecap="round"/></svg>`,
+    'fish': `<svg viewBox="0 0 100 100"><path d="M14 50 Q40 18 72 50 Q40 82 14 50 Z" fill="#7fc8f0" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/><path d="M72 50 L94 32 V68 Z" fill="#7fc8f0" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/><circle cx="32" cy="46" r="5" fill="${INK}"/></svg>`,
+    'bird': `<svg viewBox="0 0 100 100"><circle cx="48" cy="54" r="32" fill="#f7a8c6" stroke="${INK}" stroke-width="5"/><path d="M80 48 L96 54 L80 60 Z" fill="#ffc83d" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/><circle cx="62" cy="46" r="5" fill="${INK}"/><path d="M26 58 Q40 74 54 60" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/></svg>`,
+  };
+  const DOOR = `<svg viewBox="0 0 100 100"><rect x="14" y="10" width="44" height="80" rx="4" fill="#fff7d6" stroke="${INK}" stroke-width="6"/><circle cx="48" cy="52" r="4" fill="${INK}"/><path d="M62 50 H92 M80 38 L92 50 L80 62" fill="none" stroke="${INK}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const MENU = `<svg viewBox="0 0 100 100"><rect x="14" y="14" width="32" height="32" rx="5" fill="${INK}"/><rect x="54" y="14" width="32" height="32" rx="5" fill="${INK}"/><rect x="14" y="54" width="32" height="32" rx="5" fill="${INK}"/><rect x="54" y="54" width="32" height="32" rx="5" fill="${INK}"/></svg>`;
+  const PAINT = `<svg viewBox="0 0 100 100"><path d="M70 14 L86 30 L44 72 L28 56 Z" fill="#3d7be0" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/><path d="M28 56 Q12 60 14 86 Q38 88 44 72" fill="#d63b3b" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/></svg>`;
+  const MUSIC = `<svg viewBox="0 0 100 100"><path d="M38 74 V22 L80 14 V66" fill="none" stroke="${INK}" stroke-width="6" stroke-linejoin="round"/><circle cx="28" cy="74" r="12" fill="${INK}"/><circle cx="70" cy="66" r="12" fill="${INK}"/></svg>`;
+  const SMILE = `<svg viewBox="0 0 100 100"><path d="${STAR}" fill="#ffc83d" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/><circle cx="40" cy="48" r="4" fill="${INK}"/><circle cx="60" cy="48" r="4" fill="${INK}"/><path d="M40 60 Q50 70 60 60" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/></svg>`;
+  const LOCK = `<svg class="lock" viewBox="0 0 40 40"><rect x="7" y="17" width="26" height="20" rx="4" fill="${INK}"/><path d="M13 17 V12 a7 7 0 0 1 14 0 V17" fill="none" stroke="${INK}" stroke-width="4"/></svg>`;
+  const STEP_PICS = [
+    `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#e9f8e6" stroke="${INK}" stroke-width="6"/><g transform="translate(20 22)">${powerSvg(7)}</g></svg>`,
+    `<svg viewBox="0 0 100 100"><rect x="8" y="12" width="84" height="60" rx="6" fill="#fff" stroke="${INK}" stroke-width="6"/><circle cx="50" cy="32" r="9" fill="none" stroke="${INK}" stroke-width="4"/><rect x="28" y="48" width="44" height="10" rx="3" fill="none" stroke="${INK}" stroke-width="4"/><path d="M40 72 L36 88 M60 72 L64 88 M28 90 H72" stroke="${INK}" stroke-width="6" stroke-linecap="round"/></svg>`,
+    `<svg viewBox="0 0 100 100"><rect x="8" y="12" width="84" height="60" rx="6" fill="#fff7d6" stroke="${INK}" stroke-width="6"/><rect x="26" y="22" width="22" height="40" rx="2" fill="#fff" stroke="${INK}" stroke-width="4"/><path d="M54 42 H78 M70 34 L78 42 L70 50" fill="none" stroke="${INK}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 72 L36 88 M60 72 L64 88 M28 90 H72" stroke="${INK}" stroke-width="6" stroke-linecap="round"/></svg>`,
+    `<svg viewBox="0 0 100 100"><rect x="8" y="12" width="84" height="60" rx="6" fill="#2b2b2b" stroke="${INK}" stroke-width="6"/><text x="36" y="52" font-family="Lexend,Arial" font-weight="800" font-size="24" fill="#fff">Z z</text><path d="M40 72 L36 88 M60 72 L64 88 M28 90 H72" stroke="${INK}" stroke-width="6" stroke-linecap="round"/></svg>`,
+  ];
+
+  // ---------- sound + speech ----------
+  let actx;
+  function beep(good) {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const notes = good ? [523, 659, 784] : [220, 180];
+      notes.forEach((f, i) => {
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = good ? 'triangle' : 'square'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.12, actx.currentTime + i * 0.12);
+        g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + i * 0.12 + 0.2);
+        o.connect(g).connect(actx.destination); o.start(actx.currentTime + i * 0.12); o.stop(actx.currentTime + i * 0.12 + 0.22);
+      });
+    } catch (e) {}
+  }
+  let voice = null;
+  function pickVoice() {
+    try {
+      const vs = speechSynthesis.getVoices();
+      voice = vs.find(v => /en-GB/i.test(v.lang) && /female|libby|sonia|hazel|kate|serena/i.test(v.name)) || vs.find(v => /en-GB/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+    } catch (e) {}
+  }
+  try { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; } catch (e) {}
+  let lastSaid = '';
+  function say(text, then) {
+    lastSaid = text;
+    $('caption').textContent = text;
+    $('orderCaption').textContent = text;
+    let done = false; const finish = () => { if (!done) { done = true; then && then(); } };
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      if (voice) u.voice = voice; u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.88; u.pitch = 1.1;
+      u.onend = finish; u.onerror = finish;
+      speechSynthesis.speak(u);
+      setTimeout(finish, 900 + text.length * 85); // fallback if speech never ends
+    } catch (e) { setTimeout(finish, 900 + text.length * 60); }
+  }
+  $('listen').onclick = () => say(lastSaid);
+
+  // ---------- stars ----------
+  const ROUNDS = 3;
+  function drawStars(n) {
+    $('stars').innerHTML = '';
+    for (let i = 0; i < ROUNDS + 1; i++) {
+      const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      s.setAttribute('viewBox', '0 0 100 100'); s.innerHTML = `<path d="${STAR}"/>`;
+      if (i < n) s.classList.add('on');
+      $('stars').appendChild(s);
+    }
+  }
+
+  // ---------- game state ----------
+  const screen = $('screen');
+  let round = 0, stars = 0, step = '', busy = false, pwTarget = [], pwIndex = 0, me = '';
+  const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+  function glow(el) { document.querySelectorAll('.pulse').forEach(e => e.classList.remove('pulse')); if (el) el.classList.add('pulse'); }
+  function oops(el, msg) {
+    if (busy) return;
+    beep(false);
+    if (el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+    say(msg || 'Oops! Listen again.', () => prompt());
+  }
+  function good(msg, next) { busy = true; beep(true); glow(null); say(msg, () => { busy = false; next(); }); }
+
+  const PROMPTS = {
+    off: 'The computer is asleep. Press the power button to switch it on.',
+    name: () => `Log on. First, click your picture. You are the ${me}.`,
+    pw: () => `Now your secret password. Click ${pwTarget.join(', then ')}.`,
+    enter: 'Now press the Enter key.',
+    desk: 'You are logged on! Now log off. Click the door.',
+    menu: 'Good! Now shut down the computer. Click the menu button.',
+    powermenu: 'Click the power button.',
+    sd: 'Click shut down.',
+  };
+  function prompt() { const p = PROMPTS[step]; say(typeof p === 'function' ? p() : p); }
+
+  function setScreen(cls, html) { screen.className = 'screen ' + (cls || ''); screen.innerHTML = html || ''; }
+
+  function goOff() {
+    step = 'off'; setScreen('off', ''); $('hint').hidden = true; glow($('power')); prompt();
+  }
+  function goLoading(next) {
+    step = 'loading';
+    setScreen('', `<div class="layer"><svg class="spinner spin" viewBox="0 0 100 100">${[0,1,2,3,4,5,6,7].map(i => { const a = i * Math.PI / 4; return `<circle cx="${50 + 34 * Math.cos(a)}" cy="${50 + 34 * Math.sin(a)}" r="${4 + i * 1.1}" opacity="${0.25 + i * 0.1}"/>`; }).join('')}</svg></div>`);
+    say('Wait. Hands in your lap.', () => setTimeout(next, 600));
+  }
+  function goName() {
+    step = 'name';
+    const names = shuffle(Object.keys(AVATARS));
+    setScreen('', `<div class="layer"><div class="who">${names.map(n => `<button class="tile" data-n="${n}" aria-label="${n}">${AVATARS[n]}</button>`).join('')}</div></div>`);
+    screen.querySelectorAll('.tile').forEach(t => t.onclick = () => {
+      if (busy || step !== 'name') return;
+      t.dataset.n === me ? good('Yes! That is you.', goPw) : oops(t, `Oops! You are the ${me}. Listen again.`);
+    });
+    prompt();
+  }
+  function showHint() {
+    $('hint').innerHTML = LOCK + pwTarget.map(s => `<span class="shape">${SHAPES[s]}</span>`).join('');
+    $('hint').hidden = false;
+  }
+  function goPw() {
+    step = 'pw'; pwIndex = 0; showHint();
+    const keys = shuffle(Object.keys(SHAPES));
+    setScreen('', `<div class="layer"><div class="pw"><div class="dots">${pwTarget.map(() => '<span class="dot"></span>').join('')}</div><div class="pads">${keys.map(k => `<button class="pad" data-k="${k}" aria-label="${k}">${SHAPES[k]}</button>`).join('')}</div></div></div>`);
+    screen.querySelectorAll('.pad').forEach(p => p.onclick = () => {
+      if (busy || step !== 'pw') return;
+      if (p.dataset.k === pwTarget[pwIndex]) {
+        screen.querySelectorAll('.dot')[pwIndex].classList.add('full'); pwIndex++; beep(true);
+        if (pwIndex === pwTarget.length) good('Good! You see dots, not pictures. That keeps it secret.', goEnter);
+      } else {
+        screen.querySelectorAll('.dot').forEach(d => d.classList.remove('full')); pwIndex = 0;
+        oops(p, 'Oops! Start again.');
+      }
+    });
+    prompt();
+  }
+  function goEnter() { step = 'enter'; glow($('enter')); prompt(); }
+  function goDesk() {
+    step = 'desk'; $('hint').hidden = true;
+    setScreen('desk', `<div class="layer"><div class="yay">${SMILE}</div></div>
+      <button class="corner tl" data-x="paint" aria-label="Paint">${PAINT}</button>
+      <button class="corner bl" data-x="music" aria-label="Music">${MUSIC}</button>
+      <button class="corner tr" data-x="door" aria-label="Log off">${DOOR}</button>`);
+    screen.querySelectorAll('.corner').forEach(c => c.onclick = () => {
+      if (busy || step !== 'desk') return;
+      c.dataset.x === 'door' ? good('Bye bye! You logged off. Your work is safe.', goMenu) : oops(c, 'Not now! Find the door to log off.');
+    });
+    prompt();
+  }
+  function goMenu() {
+    step = 'menu';
+    setScreen('', `<div class="layer"><div class="who">${Object.keys(AVATARS).map(n => `<button class="tile" aria-label="${n}">${AVATARS[n]}</button>`).join('')}</div></div>
+      <button class="corner bl" id="menuBtn" aria-label="Menu">${MENU}</button>`);
+    $('menuBtn').onclick = () => { if (busy) return; if (step === 'menu') good('Good.', goPowerMenu); };
+    screen.querySelectorAll('.tile').forEach(t => t.onclick = () => { if (step === 'menu') oops(t, 'Not now. Find the menu button in the corner.'); });
+    prompt();
+  }
+  function goPowerMenu() {
+    step = 'powermenu';
+    screen.insertAdjacentHTML('beforeend', `<div class="menu-pop" id="pop">
+      <button class="opt" data-o="x"><span class="bar"></span></button>
+      <button class="opt" data-o="p" aria-label="Power"><svg viewBox="0 0 60 60">${powerSvg(7)}</svg></button>
+      <button class="opt" data-o="x"><span class="bar"></span></button></div>`);
+    $('pop').querySelectorAll('.opt').forEach(o => o.onclick = () => {
+      if (busy || step !== 'powermenu') return;
+      o.dataset.o === 'p' ? good('Good.', goSd) : oops(o, 'Oops! Find the power button picture.');
+    });
+    prompt();
+  }
+  function goSd() {
+    step = 'sd';
+    $('pop').innerHTML = `
+      <button class="opt" data-o="x"><span class="bar" style="width:40%"></span></button>
+      <button class="opt sd" data-o="sd"><svg viewBox="0 0 60 60">${powerSvg(7)}</svg>Shut down</button>
+      <button class="opt" data-o="x"><span class="bar" style="width:30%"></span></button>`;
+    $('pop').querySelectorAll('.opt').forEach(o => o.onclick = () => {
+      if (busy || step !== 'sd') return;
+      o.dataset.o === 'sd' ? finishRound() : oops(o, 'Oops! Click shut down. It is yellow.');
+    });
+    prompt();
+  }
+  function finishRound() {
+    step = 'done'; busy = true; beep(true);
+    setScreen('off', `<div class="zz">Z z z</div>`);
+    stars++; drawStars(stars);
+    say(round < ROUNDS - 1 ? 'The computer is asleep. You did it! You win a star.' : 'You did it! You win a star. Now the bonus game!', () => {
+      busy = false; round++;
+      round < ROUNDS ? newRound() : startOrder();
+    });
+  }
+
+  // physical controls
+  $('power').onclick = () => {
+    if (busy) return;
+    if (step === 'off') { good('Great! The computer is waking up.', () => goLoading(goName)); }
+    else if (step === 'loading') { say('Wait. It is still waking up. Hands in your lap.'); }
+    else if (['menu', 'powermenu', 'sd'].includes(step)) { oops($('power'), 'Do not press the button on the computer. Use the menu on the screen.'); }
+    else if (step !== 'done') { oops($('power'), 'The computer is already on!'); }
+  };
+  $('enter').onclick = () => {
+    if (busy) return;
+    if (step === 'enter') { good('Welcome!', goDesk); }
+    else if (step === 'pw') { oops($('enter'), 'Not yet! Click your password pictures first.'); }
+    else if (step !== 'done' && step !== 'loading') { oops($('enter'), 'Oops! Listen again.'); }
+  };
+  $('plug').onclick = () => { if (busy) return; beep(false); const p = $('plug'); p.classList.remove('shake'); void p.offsetWidth; p.classList.add('shake'); say('No! Never pull the plug. It can break the computer.', () => { if (step !== 'done' && step !== 'loading') prompt(); }); };
+
+  function newRound() {
+    me = Object.keys(AVATARS)[round % 3];
+    pwTarget = shuffle(Object.keys(SHAPES)).slice(0, 3);
+    goOff();
+  }
+
+  // ---------- bonus: put the steps in order ----------
+  const STEP_WORDS = ['switch on', 'log on', 'log off', 'shut down'];
+  let orderNext = 0;
+  function startOrder() {
+    $('game').hidden = true; $('order').hidden = false; orderNext = 0;
+    const idx = shuffle([0, 1, 2, 3]);
+    $('orderCards').innerHTML = idx.map(i => `<button class="card" data-i="${i}" aria-label="${STEP_WORDS[i]}">${STEP_PICS[i]}</button>`).join('');
+    $('orderCards').querySelectorAll('.card').forEach(c => c.onclick = () => {
+      if (busy || c.classList.contains('done')) return;
+      const i = +c.dataset.i;
+      if (i === orderNext) {
+        c.classList.add('done'); c.insertAdjacentHTML('beforeend', `<span class="n">${i + 1}</span>`); orderNext++;
+        if (orderNext === 4) { busy = true; beep(true); stars++; drawStars(stars); say('Switch on. Log on. Log off. Shut down. Perfect!', () => { busy = false; showEnd(); }); }
+        else { beep(true); say(STEP_WORDS[i] + '! What comes next?'); }
+      } else {
+        beep(false); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
+        say(orderNext === 0 ? 'Oops! What do we do first?' : 'Oops! What comes next?');
+      }
+    });
+    say('Bonus game! Click the pictures in the right order. What do we do first?');
+  }
+
+  function showEnd() {
+    $('order').hidden = true; $('end').hidden = false;
+    say('Wow! You are a Computer Captain!');
+  }
+
+  function startGame() {
+    round = 0; stars = 0; drawStars(0);
+    $('start').hidden = true; $('end').hidden = true; $('order').hidden = true; $('game').hidden = false;
+    newRound();
+  }
+
+  // start screen
+  $('startSteps').innerHTML = STEP_PICS.map((p, i) => `<div class="card">${p}<span class="n">${i + 1}</span></div>`).join('');
+  drawStars(0);
+  $('playBtn').onclick = startGame;
+  $('again').onclick = startGame;
+})();
+</script>
+
+</body></html>
